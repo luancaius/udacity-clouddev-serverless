@@ -7,9 +7,7 @@ import { getUserId } from "../utils";
 import * as AWSXRay from 'aws-xray-sdk'
 
 const XAWS = AWSXRay.captureAWS(AWS)
-
 const docClient = createDynamoDBClient()
-
 const table = process.env.TODOS_TABLE
 
 export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {

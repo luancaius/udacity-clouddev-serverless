@@ -16,8 +16,8 @@ const table = process.env.TODOS_TABLE
 export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
   const todoId = event.pathParameters.todoId
   const updatedTodo: UpdateTodoRequest = JSON.parse(event.body)
-
   const timestamp = new Date().toISOString();
+
   const userId = getUserId(event)
 
   const newItem = {
@@ -31,7 +31,20 @@ export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEven
 
   await docClient.update({
     TableName: table,
-    Item: newItem
+    Key: {
+      todoId: todoId,
+      userId: userId
+    },
+    ExpressionAttributeValues: {
+      ':name': newItem.name,
+      ':done': newItem.done,
+      ':dueDate': newItem.dueDate,
+    },
+    ExpressionAttributeNames: {
+      "#attrName": "name"
+    },
+    UpdateExpression: 'SET #attrName=:name, done=:done, dueDate=:dueDate',
+    ReturnValues: 'ALL_NEW'
   }).promise();
 
   return {
