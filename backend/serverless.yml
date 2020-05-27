@@ -10,6 +10,9 @@ provider:
   runtime: nodejs12.x
   stage: ${opt:stage, 'dev'}
   region: ${opt:region, 'us-east-1'}
+  tracing:
+    apiGateway: true
+    lambda: true
   environment:
     TODOS_TABLE: Todos-${self:provider.stage}
     INDEX_NAME: IndexTodo
@@ -19,7 +22,7 @@ provider:
   iamRoleStatements:
     - Effect: Allow
       Action:
-        - dynamodb:Scan
+        - dynamodb:Query
         - dynamodb:PutItem
         - dynamodb:GetItem
         - dynamodb:UpdateItem
@@ -42,13 +45,14 @@ provider:
 
 
 functions:
-  Auth:
+  AuthRS256:
     handler: src/lambda/auth/auth0Authorizer.handler
 
   GetTodos:
     handler: src/lambda/http/getTodos.handler
     events:
       - http:
+          authorizer: AuthRS256
           method: get
           path: todos
           cors: true
@@ -57,6 +61,7 @@ functions:
     handler: src/lambda/http/createTodo.handler
     events:
       - http:
+          authorizer: AuthRS256
           method: post
           path: todos
           cors: true
@@ -65,6 +70,7 @@ functions:
     handler: src/lambda/http/updateTodo.handler
     events:
       - http:
+          authorizer: AuthRS256
           method: patch
           path: todos/{todoId}
           cors: true
@@ -73,6 +79,7 @@ functions:
     handler: src/lambda/http/deleteTodo.handler
     events:
       - http:
+          authorizer: AuthRS256
           method: delete
           path: todos/{todoId}
           cors: true
@@ -81,6 +88,7 @@ functions:
     handler: src/lambda/http/generateUploadUrl.handler
     events:
       - http:
+          authorizer: AuthRS256
           method: post
           path: todos/{todoId}/attachment
           cors: true

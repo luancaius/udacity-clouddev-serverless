@@ -10,12 +10,12 @@ import { parseUserId } from "../auth/utils";
 export function getUserId(event: APIGatewayProxyEvent): string {
 
   const authorization = event.headers.Authorization
-  console.log(authorization);
 
-  if (event.headers)
-    return "1";
   const split = authorization.split(' ')
   const jwtToken = split[1]
 
-  return parseUserId(jwtToken)
+  const userId = parseUserId(jwtToken)
+  console.log(authorization);
+
+  return userId;
 }

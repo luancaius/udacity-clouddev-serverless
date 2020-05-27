@@ -1,7 +1,8 @@
 import 'source-map-support/register'
 import * as AWS from 'aws-sdk';
 import * as AWSXRay from 'aws-xray-sdk'
-import { APIGatewayProxyResult, APIGatewayProxyHandler } from 'aws-lambda'
+import { APIGatewayProxyResult, APIGatewayProxyHandler, APIGatewayProxyEvent } from 'aws-lambda'
+import { getUserId } from "../utils";
 
 const XAWS = AWSXRay.captureAWS(AWS)
 const docClient = createDynamoDBClient()
@@ -9,11 +10,21 @@ const docClient = createDynamoDBClient()
 const todosTable = process.env.TODOS_TABLE
 //const indexName = process.env.INDEX_NAME
 
-export const handler: APIGatewayProxyHandler = async (): Promise<APIGatewayProxyResult> => {
+export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
+
+  console.log(event);
+
+  const userId = getUserId(event)
+  console.log(userId);
 
 
-  const result = await docClient.scan({
-    TableName: todosTable
+  const result = await docClient.query({
+    TableName: todosTable,
+    KeyConditionExpression: 'userId = :userId',
+    ExpressionAttributeValues: {
+      ':userId': userId
+    },
+    ScanIndexForward: false
   }).promise();
 
   return {

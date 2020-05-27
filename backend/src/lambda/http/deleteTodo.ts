@@ -2,6 +2,7 @@ import 'source-map-support/register'
 import { APIGatewayProxyEvent, APIGatewayProxyResult, APIGatewayProxyHandler } from 'aws-lambda'
 import * as AWS from 'aws-sdk';
 import * as AWSXRay from 'aws-xray-sdk'
+import { getUserId } from "../utils";
 
 const XAWS = AWSXRay.captureAWS(AWS)
 
@@ -24,20 +25,13 @@ export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEven
   const todoId = event.pathParameters.todoId
 
   console.log('deleting todoId ' + todoId);
-
-  const item = await docClient.getItem({
-    TableName: table,
-    Key: {
-      todoId: todoId
-    }
-  }).promise();
-
+  const userId = getUserId(event)
 
   await docClient.delete({
     TableName: table,
     Key: {
       todoId: todoId,
-      timestamp: item.timestamp
+      userId: userId
     }
   }).promise();
 
