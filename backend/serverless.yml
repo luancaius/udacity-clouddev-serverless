@@ -10,13 +10,13 @@ custom:
     api:
       info:
         version: v1.0.0
-        title: Udagram API
-        description: Serverless udagram
+        title: Todo API
+        description: Serverless todo
     models:
-      - name: GroupRequest
+      - name: CreateRequest
         contentType: application/json
         schema: ${file(models/CreateTodoRequest.json)}
-      - name: ImageRequest
+      - name: UpdateRequest
         contentType: application/json
         schema: ${file(models/UpdateTodoRequest.json)}
 
