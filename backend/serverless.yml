@@ -5,6 +5,21 @@ plugins:
   - serverless-webpack
   - serverless-iam-roles-per-function
 
+custom:
+  documentation:
+    api:
+      info:
+        version: v1.0.0
+        title: Udagram API
+        description: Serverless udagram
+    models:
+      - name: GroupRequest
+        contentType: application/json
+        schema: ${file(models/CreateTodoRequest.json)}
+      - name: ImageRequest
+        contentType: application/json
+        schema: ${file(models/UpdateTodoRequest.json)}
+
 provider:
   name: aws
   runtime: nodejs12.x
@@ -16,10 +31,9 @@ provider:
   environment:
     TODOS_TABLE: Todos-${self:provider.stage}
     TODO_LOCAL_INDEX: TodoLocalIndex
-    IMAGES_TABLE: Images-${self:provider.stage}
     TODO_GLOBAL_INDEX: TodoGlobalIndex
-    IMAGE_ID_INDEX: ImageIdIndex3
     IMAGES_S3_BUCKET: todo-images-s3-bucket-${self:provider.stage}
+    SIGNED_URL_EXPIRATION: 300
   iamRoleStatements:
     - Effect: Allow
       Action:
@@ -38,15 +52,6 @@ provider:
         - s3:PutObject
         - s3:GetObject
       Resource: arn:aws:s3:::${self:provider.environment.IMAGES_S3_BUCKET}/*
-    - Effect: Allow
-      Action:
-        - dynamodb:Query
-        - dynamodb:PutItem
-      Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.IMAGES_TABLE}
-    - Effect: Allow
-      Action:
-        - dynamodb:Query
-      Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.IMAGES_TABLE}/index/${self:provider.environment.IMAGE_ID_INDEX}
 
 functions:
   AuthRS256:
@@ -130,31 +135,6 @@ resources:
                 KeyType: RANGE
             Projection:
               ProjectionType: ALL # What attributes will be copied to an index
-
-    ImagesDynamoDBTable:
-          Type: AWS::DynamoDB::Table
-          Properties:
-            AttributeDefinitions:
-              - AttributeName: todoId
-                AttributeType: S
-              - AttributeName: timestamp
-                AttributeType: S
-              - AttributeName: imageId
-                AttributeType: S
-            KeySchema:
-              - AttributeName: todoId
-                KeyType: HASH
-              - AttributeName: timestamp
-                KeyType: RANGE
-            GlobalSecondaryIndexes:
-              - IndexName: ${self:provider.environment.IMAGE_ID_INDEX}
-                KeySchema:
-                - AttributeName: imageId
-                  KeyType: HASH
-                Projection:
-                  ProjectionType: ALL
-            BillingMode: PAY_PER_REQUEST
-            TableName: ${self:provider.environment.IMAGES_TABLE}
 
     GatewayResponseDefault4XX:
       Type: 'AWS::ApiGateway::GatewayResponse'
