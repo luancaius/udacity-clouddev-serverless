@@ -20,7 +20,9 @@ export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEven
   const newItem = {
     todoId,
     userId,
-    timestamp,
+    createdAt: timestamp,
+    done: false,
+    attachmentUrl: '',
     ...newTodo
   }
 
@@ -33,9 +35,10 @@ export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEven
 
   return {
     statusCode: 200,
-    body: JSON.stringify({ newItem }),
+    body: JSON.stringify({ item: newItem }),
     headers: {
-      'Access-Control-Allow-Origin': '*'
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Credentials': true
     }
   };
 }

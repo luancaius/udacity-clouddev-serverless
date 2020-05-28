@@ -9,6 +9,7 @@ const XAWS = AWSXRay.captureAWS(AWS)
 const docClient = createDynamoDBClient()
 
 const table = process.env.TODOS_TABLE
+const localIndex = process.env.TODO_LOCAL_INDEX
 
 function createDynamoDBClient() {
   if (process.env.IS_OFFLINE) {
@@ -24,11 +25,13 @@ function createDynamoDBClient() {
 export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
   const todoId = event.pathParameters.todoId
 
-  console.log('deleting todoId ' + todoId);
   const userId = getUserId(event)
+
+  console.log(todoId + ' ' + userId);
 
   await docClient.delete({
     TableName: table,
+    IndexName: localIndex,
     Key: {
       todoId: todoId,
       userId: userId
@@ -37,9 +40,10 @@ export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEven
 
   return {
     statusCode: 200,
-    body: `${todoId} deleted`,
+    body: '',
     headers: {
-      'Access-Control-Allow-Origin': '*'
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Credentials': true
     }
   };
 

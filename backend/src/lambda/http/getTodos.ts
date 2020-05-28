@@ -8,18 +8,15 @@ const XAWS = AWSXRay.captureAWS(AWS)
 const docClient = createDynamoDBClient()
 
 const todosTable = process.env.TODOS_TABLE
-//const indexName = process.env.INDEX_NAME
+const globalIndexTodo = process.env.TODO_GLOBAL_INDEX
 
 export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
 
-  console.log(event);
-
   const userId = getUserId(event)
-  console.log(userId);
-
 
   const result = await docClient.query({
     TableName: todosTable,
+    IndexName: globalIndexTodo,
     KeyConditionExpression: 'userId = :userId',
     ExpressionAttributeValues: {
       ':userId': userId
@@ -29,9 +26,10 @@ export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEven
 
   return {
     statusCode: 200,
-    body: JSON.stringify(result.Items),
+    body: JSON.stringify({ items: result.Items }),
     headers: {
-      'Access-Control-Allow-Origin': '*'
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Credentials': true
     }
   };
 }
