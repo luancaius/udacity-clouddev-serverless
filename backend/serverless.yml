@@ -1,5 +1,5 @@
 service:
-  name: serverless-todo-app1
+  name: serverless-todo-app2
 
 plugins:
   - serverless-webpack
@@ -15,13 +15,6 @@ custom:
         version: v1.0.0
         title: Todo API
         description: Serverless todo
-    models:
-      - name: CreateRequest
-        contentType: application/json
-        schema: ${file(models/CreateTodoRequest.json)}
-      - name: UpdateRequest
-        contentType: application/json
-        schema: ${file(models/UpdateTodoRequest.json)}
   serverless-offline:
     httpPort: 5000
   dynamodb:
@@ -86,12 +79,6 @@ functions:
           method: post
           path: todos
           cors: true
-          reqValidatorName: RequestBodyValidator
-          documentation:
-            summary: Create a new todo
-            description: Create a new todo
-            requestModels:
-              'application/json' : CreateTodoRequest
 
   UpdateTodo:
     handler: src/lambda/http/updateTodo.handler
@@ -101,12 +88,6 @@ functions:
           method: patch
           path: todos/{todoId}
           cors: true
-          reqValidatorName: RequestBodyValidator
-          documentation:
-            summary: Update a new todo
-            description: Update a new todo
-            requestModels:
-              'application/json' : UpdateTodoRequest
 
   DeleteTodo:
     handler: src/lambda/http/deleteTodo.handler

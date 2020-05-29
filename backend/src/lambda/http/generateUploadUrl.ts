@@ -68,12 +68,12 @@ async function updateTodoAttachment(todoId: String, userId: String) {
             userId: userId
         },
         ExpressionAttributeValues: {
-            ':attachment': `https://${bucketName}.s3.amazonaws.com/${todoId}`
+            ':attachmentUrl': `https://${bucketName}.s3.amazonaws.com/${todoId}`
         },
         ExpressionAttributeNames: {
-            "#attachment": "attachment"
+            "#attachmentUrl": "attachmentUrl"
         },
-        UpdateExpression: 'SET #attachment=:attachment',
+        UpdateExpression: 'SET #attachmentUrl=:attachmentUrl',
         ReturnValues: 'ALL_NEW'
     }).promise();
 }
