@@ -47,22 +47,14 @@ provider:
     IMAGES_S3_BUCKET: todo-images-s3-bucket-${self:provider.stage}
     SIGNED_URL_EXPIRATION: 300
   iamRoleStatements:
-    - Effect: Allow
+    - Effect: "Allow"
       Action:
-        - dynamodb:Query
-        - dynamodb:PutItem
-        - dynamodb:GetItem
-        - dynamodb:UpdateItem
-        - dynamodb:DeleteItem
-      Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODOS_TABLE}
-    - Effect: Allow
-      Action:
-        - dynamodb:Query
-      Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODOS_TABLE}/index/${self:provider.environment.TODO_GLOBAL_INDEX}
+        - xray:PutTelemetryRecords
+        - xray:PutTraceSegments
+      Resource: "*"
     - Effect: Allow
       Action:
         - s3:PutObject
-        - s3:GetObject
       Resource: arn:aws:s3:::${self:provider.environment.IMAGES_S3_BUCKET}/*
 
 functions:
@@ -71,6 +63,10 @@ functions:
 
   GetTodos:
     handler: src/lambda/http/getTodos.handler
+    iamRoleStatements:
+      - Effect: Allow
+        Action: dynamodb:Query
+        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODOS_TABLE}/index/${self:provider.environment.TODO_GLOBAL_INDEX}
     events:
       - http:
           authorizer: AuthRS256
@@ -80,6 +76,10 @@ functions:
 
   CreateTodo:
     handler: src/lambda/http/createTodo.handler
+    iamRoleStatements:
+     - Effect: Allow
+       Action: dynamodb:PutItem
+       Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODOS_TABLE}
     events:
       - http:
           authorizer: AuthRS256
@@ -95,6 +95,10 @@ functions:
 
   UpdateTodo:
     handler: src/lambda/http/updateTodo.handler
+    iamRoleStatements:
+     - Effect: Allow
+       Action: dynamodb:UpdateItem
+       Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODOS_TABLE}
     events:
       - http:
           authorizer: AuthRS256
@@ -110,6 +114,10 @@ functions:
 
   DeleteTodo:
     handler: src/lambda/http/deleteTodo.handler
+    iamRoleStatements:
+     - Effect: Allow
+       Action: dynamodb:DeleteItem
+       Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODOS_TABLE}
     events:
       - http:
           authorizer: AuthRS256
@@ -119,6 +127,17 @@ functions:
 
   GenerateUploadUrl:
     handler: src/lambda/http/generateUploadUrl.handler
+    iamRoleStatements:
+      - Effect: Allow
+        Action: 
+          - dynamodb:UpdateItem
+          - dynamodb:GetItem
+        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODOS_TABLE}
+      - Effect: Allow
+        Action: 
+          - s3:PutObject
+          - s3:GetObject
+        Resource: arn:aws:s3:::${self:provider.environment.IMAGES_S3_BUCKET}/*
     events:
       - http:
           authorizer: AuthRS256
