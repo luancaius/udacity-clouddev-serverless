@@ -4,6 +4,9 @@ service:
 plugins:
   - serverless-webpack
   - serverless-iam-roles-per-function
+  - serverless-plugin-canary-deployments
+  - serverless-dynamodb-local
+  - serverless-offline
 
 custom:
   documentation:
@@ -19,6 +22,15 @@ custom:
       - name: UpdateRequest
         contentType: application/json
         schema: ${file(models/UpdateTodoRequest.json)}
+  serverless-offline:
+    httpPort: 5000
+  dynamodb:
+    start:
+      port: 8000
+      inMemory: true
+      migrate: true
+    stages:
+      - dev
 
 provider:
   name: aws
@@ -74,6 +86,12 @@ functions:
           method: post
           path: todos
           cors: true
+          reqValidatorName: RequestBodyValidator
+          documentation:
+            summary: Create a new todo
+            description: Create a new todo
+            requestModels:
+              'application/json' : CreateTodoRequest
 
   UpdateTodo:
     handler: src/lambda/http/updateTodo.handler
@@ -83,6 +101,12 @@ functions:
           method: patch
           path: todos/{todoId}
           cors: true
+          reqValidatorName: RequestBodyValidator
+          documentation:
+            summary: Update a new todo
+            description: Update a new todo
+            requestModels:
+              'application/json' : UpdateTodoRequest
 
   DeleteTodo:
     handler: src/lambda/http/deleteTodo.handler
@@ -165,3 +189,17 @@ resources:
                 - DELETE
                 - HEAD
               MaxAge: 3000
+    
+    BucketPolicy:
+      Type: AWS::S3::BucketPolicy
+      Properties:
+        PolicyDocument: 
+          Id: MyPolicy
+          Version: "2012-10-17"
+          Statement:
+            - Sid: PublicReadForGetBucketObjects
+              Effect: Allow
+              Principal: '*'
+              Action: 's3:GetObject'
+              Resource: 'arn:aws:s3:::${self:provider.environment.IMAGES_S3_BUCKET}/*'
+        Bucket: !Ref AttachmentsBucket

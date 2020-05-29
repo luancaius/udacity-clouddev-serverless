@@ -22,7 +22,7 @@ export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEven
     userId,
     createdAt: timestamp,
     done: false,
-    attachmentUrl: '',
+    attachment: '',
     ...newTodo
   }
 
