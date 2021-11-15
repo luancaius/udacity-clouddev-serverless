@@ -15,13 +15,6 @@ custom:
         version: v1.0.0
         title: Todo API
         description: Serverless todo
-    models:
-    - name: CreateTodoRequest
-      contentType: application/json
-      schema: ${file(models/create-todo-request.json)}
-    - name: UpdateTodoRequest
-      contentType: application/json
-      schema: ${file(models/update-todo-request.json)}
   serverless-offline:
     httpPort: 5000
   dynamodb:
@@ -86,12 +79,13 @@ functions:
           method: post
           path: todos
           cors: true
-          reqValidatorName: RequestBodyValidator
+          request:
+            schemas:
+              application/json: ${file(src/models/create-todo-request.json)}
           documentation:
             summary: Create a new todo
             description: Create a new todo
-            requestModels:
-              'application/json' : CreateTodoRequest
+
 
   UpdateTodo:
     handler: src/lambda/http/updateTodo.handler
@@ -105,7 +99,9 @@ functions:
           method: patch
           path: todos/{todoId}
           cors: true
-          reqValidatorName: RequestBodyValidator
+          request:
+            schemas:
+              application/json: ${file(src/models/update-todo-request.json)}
           documentation:
             summary: Update a todo item
             description: Update a todo item
