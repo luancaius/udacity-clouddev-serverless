@@ -1,10 +1,11 @@
 {
     "$schema": "http://json-schema.org/draft-04/schema#",
-    "title": "group",
+    "title": "TodoUpdate",
     "type": "object",
     "properties": {
         "name": {
-            "type": "string"
+            "type": "string",
+            "pattern": "^[a-zA-Z0-9]+$"
         },
         "dueDate": {
             "type": "string"
